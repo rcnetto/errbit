@@ -101,4 +101,16 @@ class User
       break token unless User.where(authentication_token: token).first
     end
   end
+  
+  def ldap_before_save
+    validLogin = Devise::LDAP::Adapter.valid_login?(self.username)
+    DeviseLdapAuthenticatable::Logger.send("Valid Login #{validLogin}")
+    uid = Devise::LDAP::Adapter.get_ldap_param(self.username, "uid")
+    name = Devise::LDAP::Adapter.get_ldap_param(self.username, "cn")
+    DeviseLdapAuthenticatable::Logger.send("name #{name}")
+    mail = Devise::LDAP::Adapter.get_ldap_param(self.username, "mail")
+    DeviseLdapAuthenticatable::Logger.send("mail #{mail}")
+    self.name = name.first
+    self.email = mail.first
+  end
 end
